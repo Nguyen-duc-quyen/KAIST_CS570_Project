@@ -1,0 +1,10 @@
+albumentations==1.4.18
+numpy==1.24.4
+opencv-python==4.10.0.82
+tqdm
+hydra-core
+omegaconf
+wandb
+torcheval
+torchsummary
+tensorboard

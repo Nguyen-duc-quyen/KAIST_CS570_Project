@@ -1,0 +1,14 @@
+weight/
+outputs/
+# Jupyter Notebook Checkpoints
+**/.ipynb_checkpoints/
+# Pychon cache
+__pycache__/
+# Python egg
+*.egg-info/
+# Python bytecode
+*.pyc
+# Python virtual environment
+.venv/
+# VS Code settings
+.vscode/
