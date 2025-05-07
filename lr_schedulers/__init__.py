@@ -3,7 +3,7 @@ from hydra.utils import instantiate
 from torch.optim import Optimizer
 
 
-def build_lr_scheduler(cfg, optimizer: Optimizer):
+def build_lr_scheduler(cfg, **kwargs):
     """Return optimizer
 
     Args:
@@ -15,5 +15,5 @@ def build_lr_scheduler(cfg, optimizer: Optimizer):
     if cfg == "None" or cfg == None:
         return None
     else:
-        lr_scheduler = instantiate(cfg, optimizer=optimizer)
+        lr_scheduler = instantiate(cfg, **kwargs)
         return lr_scheduler

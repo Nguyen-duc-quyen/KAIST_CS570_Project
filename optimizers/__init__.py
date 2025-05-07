@@ -2,7 +2,7 @@ from .custom_optimizers import *
 from hydra.utils import instantiate
 
 
-def build_optimizer(cfg, params):
+def build_optimizer(cfg, **kwargs):
     """Return optimizer
 
     Args:
@@ -11,5 +11,5 @@ def build_optimizer(cfg, params):
     Returns:
         
     """
-    optimizer = instantiate(cfg, params=params)
+    optimizer = instantiate(cfg, **kwargs)
     return optimizer

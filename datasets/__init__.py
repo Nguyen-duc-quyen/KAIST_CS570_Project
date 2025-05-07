@@ -1,9 +1,10 @@
-from .registry import DATASET
-from .datasets import *
+import numpy as np
+import torch
 from hydra.utils import instantiate
-import albumentations as A
 from torch.utils.data import DataLoader
-from torch.utils.data.distributed import DistributedSampler
+from lightning import LightningDataModule
+import albumentations as A
+
 
 def custom_worker_init_func(x):
     return np.random.seed((torch.initial_seed()) % (2**32))
@@ -11,37 +12,46 @@ def custom_worker_init_func(x):
 
 def build_transforms(cfg):
     augmentations = [instantiate(aug) for aug in cfg]
+    augmentations = A.Compose(augmentations)
     return augmentations
 
 
-def build_dataloader(dataset_name, transforms, shuffle, image_dir, label_dir, batchsize, num_workers, use_ddp=False):
-    dataset = DATASET[dataset_name](
-        image_dir=image_dir,
-        label_dir=label_dir,
-        transforms=transforms
+def build_dataset(cfg, **kwargs):
+    dataset = instantiate(cfg, **kwargs)
+    return dataset
+
+
+def build_dataloader(cfg, dataset):
+    return DataLoader(
+        dataset=dataset,
+        batch_size=cfg["batchsize"],
+        num_workers=cfg["num_workers"],
+        shuffle=cfg["shuffle"],
+        drop_last=cfg["drop_last"],
+        worker_init_fn=custom_worker_init_func
     )
+
+
+"""
+    A Wrapper for Pytorch Lightning
+"""
+class GeneralDataModule(LightningDataModule):
+    def __init__(self, train_loader, val_loader, test_loader=None):
+        super().__init__()
+        self.train_loader = train_loader
+        self.val_loader = val_loader
+        self.test_loader = test_loader
+
+
+    def train_dataloader(self):
+        return self.train_loader
+
+
+    def val_dataloader(self):
+        return self.val_loader
+
     
-    if use_ddp:
-        sampler = DistributedSampler(dataset)
-        # Create data distributed dataloader
-        dataloader = DataLoader(
-            dataset = dataset,
-            batch_size=batchsize,
-            num_workers=num_workers,
-            sampler=sampler,
-            drop_last=False,
-            worker_init_fn=custom_worker_init_func        
-        )
-    else:
-        # Create dataloader
-        dataloader = DataLoader(
-            dataset = dataset,
-            batch_size=batchsize,
-            num_workers=num_workers,
-            shuffle=shuffle,
-            drop_last=False,
-            worker_init_fn=custom_worker_init_func        
-        )
-    
-    return dataloader
+    def test_dataloader(self):
+        return self.test_loader
+        
 

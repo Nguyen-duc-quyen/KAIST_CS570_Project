@@ -1,0 +1,13 @@
+dataset_type:
+  _target_: datasets.cifar10.CIFAR10DiffusionDataset
+  root: /home/quyennd/Data/Datasets/CIFAR10/cifar-10-batches-py
+  train: True
+transforms:
+  - _target_: albumentations.Resize
+    height: 32
+    width: 32
+  - _target_: albumentations.Normalize
+    mean: [0.4914, 0.4822, 0.4465]
+    std: [0.247, 0.243, 0.261]
+    max_pixel_value: 255.0
+  - _target_: albumentations.pytorch.ToTensorV2

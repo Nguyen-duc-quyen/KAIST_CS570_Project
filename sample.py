@@ -34,9 +34,6 @@ import datetime
 # for timezone()
 import pytz
 
-from tqdm import tqdm
-
-from PIL import Image
 
 
 @hydra.main(config_path="./configs", config_name="default", version_base="1.1")
@@ -140,78 +137,9 @@ def main(cfg):
         mean=cfg.mean,
         std=cfg.std
     )
+
+
     
-    # Setup checkpointing
-    best_checkpoint_callback = ModelCheckpoint(
-        monitor="Train_loss_epoch",
-        dirpath=cfg.checkpoint_dir,
-        filename="best",
-        save_top_k=1, # Only save the best checkpoint
-        mode="min",
-    )
-
-    epoch_checkpoint_callback = ModelCheckpoint(
-        dirpath=cfg.checkpoint_dir,
-        filename="epoch-{epoch:04d}",
-        save_top_k=-1,
-        save_last=True,
-        every_n_epochs=cfg.save_checkpoint_interval,
-    )
-
-    # Intialize Trainer
-    trainer = Trainer(
-        devices=cfg.devices,
-        accelerator=accelerator,
-        num_nodes=1,
-        precision=cfg.precision,
-        max_epochs=cfg.num_epochs,
-        logger=loggers,
-        check_val_every_n_epoch=1, # Visualize after every epochs
-        deterministic=True,
-        benchmark=False,
-        enable_checkpointing=True,
-        callbacks=[best_checkpoint_callback, epoch_checkpoint_callback]
-    )
-
-    # Run training
-    trainer.fit(
-        model=ddim_trainer,
-        datamodule=lightning_data_module)
-    
-    # Run validation
-    image_id = 0
-    sample_dir = "./generated_samples"
-    for idx, data in enumerate(val_loader):
-        print("Batch: ", idx)
-        images, labels = data
-        images = images.to(ddim_trainer.device)
-        labels = labels.to(ddim_trainer.device)
-        
-        # Sample from the model
-        generated_images = ddim_trainer.sample(num_samples=images.shape[0], num_inference_steps=cfg.num_inference_steps)
-        generated_images = generated_images * 255.0
-
-        # Calculate metrics
-        for metric in metrics:
-            metric.update(images, real=True)
-            metric.update(generated_images, real=False)
-
-
-        generated_images = generated_images.cpu().numpy()
-        generated_images = generated_images.astype(np.uint8)
-        generated_images = np.transpose(generated_images, (0, 2, 3, 1))
-
-        # Save images
-        for i in range(generated_images.shape[0]):
-            image = generated_images[i]
-            image = Image.fromarray(image)
-            image.save(os.path.join(sample_dir, f"generated_{image_id}.png"))
-            image_id += 1
-
-    for metric in metrics:
-        print(f"{metric.__class__.__name__}: {metric.compute()}")
-        metric.reset()
-        print("Evaluation completed")
 
 
 if __name__ == "__main__":

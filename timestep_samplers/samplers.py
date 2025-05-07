@@ -31,7 +31,6 @@ class ScheduleSampler(ABC):
         return NotImplemented
     
 
-    @abstractmethod
     def sample(self, batch_size, device):
         """
         Sample timeseteps for a batch
@@ -58,7 +57,7 @@ class UniformSampler(ScheduleSampler):
 
     def __init__(self, diffusion):
         self.diffusion = diffusion
-        self._weights = np.ones([diffusion.num_timesteps])
+        self._weights = np.ones([diffusion.num_train_timesteps])
 
     def weights(self):
         return self._weights
@@ -66,5 +65,3 @@ class UniformSampler(ScheduleSampler):
 
 class LossAwareSampler(ScheduleSampler):
     pass
-
-

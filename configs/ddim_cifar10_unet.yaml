@@ -31,6 +31,7 @@ batchsize: 128
 num_workers: 16
 samples_dir: "./samples"
 checkpoint_dir: "./checkpoints"
+checkpoint_path: "/home/quyennd/Data/KAIST_Courses/CS_570_AI_ML/CS_570_Latent_Consistency_Models/outputs/2025-05-02/ddim_cifar10_19-51-43/checkpoints/last.ckpt" # Path to the checkpoint file for resuming training
 
 
 # Optimizer configuration
@@ -59,11 +60,11 @@ timestep_scheduler:
 metrics:
   - _target_: torchmetrics.image.fid.FrechetInceptionDistance
     feature: 64
-    normalize: False
+    normalize: True
     input_img_size: 32
   - _target_: torchmetrics.image.inception.InceptionScore
     splits: 10
-    normalize: False
+    normalize: True
 
 
 # Dataset configuration
