@@ -1,0 +1,8 @@
+dataset_type:
+  _target_: datasets.afhq.AFHQLatentDiffusionDataset
+  root: /home/quyennd/Data/Datasets/AFHQ/afhq_latent_512
+  train: True
+transforms:
+  - _target_: datasets.transforms.ScaleLatent
+    scale: 0.18215
+  - _target_: albumentations.pytorch.ToTensorV2

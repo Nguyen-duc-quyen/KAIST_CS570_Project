@@ -33,4 +33,44 @@ class FocalLoss(nn.Module):
 
         loss = -1 * (1-pt)**self.gamma * logpt
         if self.size_average: return loss.mean()
-        else: return loss.sum() 
+        else: return loss.sum()
+        
+        
+class PseudoHuberLoss(nn.Module):
+    """The Pseudo-Huber loss."""
+
+    reductions = {'mean': torch.mean, 'sum': torch.sum, 'none': lambda x: x}
+    
+    def __init__(self, beta=1, reduction='mean'):
+        super().__init__()
+        self.beta = beta
+        self.reduction = reduction
+
+    def extra_repr(self):
+        return f'beta={self.beta:g}, reduction={self.reduction!r}'
+
+    def forward(self, input, target):
+        output = self.beta**2 * input.sub(target).div(self.beta).pow(2).add(1).sqrt().sub(1)
+        return self.reductions[self.reduction](output)
+    
+    
+class CustomPseudoHuberLoss(nn.Module):
+    """
+        The Pseudo-Huber Custom loss.
+        This follows the implementation in the Consistency Model Training code
+    """
+
+    reductions = {'mean': torch.mean, 'sum': torch.sum, 'none': lambda x: x}
+    
+    def __init__(self, huber_c=1, reduction='mean'):
+        super().__init__()
+        self.huber_c = huber_c
+        self.reduction = reduction
+
+    def extra_repr(self):
+        return f'beta={self.beta:g}, reduction={self.reduction!r}'
+
+    def forward(self, input, target, weights=1.0):
+        output = torch.sqrt((input-target)**2 + self.huber_c**2) - self.huber_c
+        output = output * weights
+        return self.reductions[self.reduction](output)

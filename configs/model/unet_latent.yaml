@@ -1,4 +1,0 @@
-_target_: diffusers.models.UNet2DModel
-sample_size: 16
-in_channels: 4
-out_channels: 4

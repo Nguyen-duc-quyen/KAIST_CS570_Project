@@ -57,7 +57,7 @@ class UniformSampler(ScheduleSampler):
 
     def __init__(self, diffusion):
         self.diffusion = diffusion
-        self._weights = np.ones([diffusion.num_train_timesteps])
+        self._weights = np.ones([diffusion.config.num_train_timesteps])
 
     def weights(self):
         return self._weights

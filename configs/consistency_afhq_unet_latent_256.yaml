@@ -1,13 +1,13 @@
 project: "CS570_AI_ML_Diffusions_AFHQ"
-exp_name: "ddim-afhq-diT"
+exp_name: "consistency-training-afhq-latent-unet-256"
 
 
 # Hierarchical configuration
 defaults:
-  - dataset@train_set: afhq_train
-  - dataset@test_set: afhq_test
-  - noise_scheduler: ddim
-  - model: dit_2d
+  - dataset@train_set: afhq_latent_256_train
+  - dataset@test_set: afhq_latent_256_test
+  - noise_scheduler: cm_stochastic
+  - model: unet_latent_32
   - _self_
 
 
@@ -15,23 +15,24 @@ defaults:
 # For the first three configuration, please check if the config for model and dataloader match
 mean: [0.485, 0.456, 0.406]
 std: [0.229, 0.224, 0.225]
-input_shape: [3, 256, 256]
+input_shape: [4, 32, 32]
 
 
-num_epochs: 500
+num_epochs: 1000
 log_interval: 1
 save_checkpoint_interval: 50
 val_interval: -1  # Validate after interval
 devices: [0] # List of gpu indices. If the list is empty, run on CPU
 use_tensorboard: False
 use_wandb: True
-precision: "32-true" # See Pytorch Lightning docs for more details
+precision: "32" # See Pytorch Lightning docs for more details
 base_lr: 1e-4 # Base learning rate
-batchsize: 4
+batchsize: 64
 num_workers: 16
 samples_dir: "./samples"
 checkpoint_dir: "./checkpoints"
 checkpoint_path: None
+latent: True
 
 
 # Optimizer configuration
@@ -43,7 +44,8 @@ optimizer:
 
 # Loss function configuration
 loss:
-  _target_: torch.nn.MSELoss
+  _target_: losses.custom_losses.CustomPseudoHuberLoss
+  huber_c: 0.03456 # 0.00054 * 32 * sqrt(4)
 
 
 # Learning rate scheduler

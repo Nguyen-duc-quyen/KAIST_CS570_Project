@@ -1,5 +1,5 @@
 project: "CS570_AI_ML_Diffusions_AFHQ"
-exp_name: "ddim-afhq-diT"
+exp_name: "ddim-afhq-unet-256"
 
 
 # Hierarchical configuration
@@ -7,7 +7,7 @@ defaults:
   - dataset@train_set: afhq_train
   - dataset@test_set: afhq_test
   - noise_scheduler: ddim
-  - model: dit_2d
+  - model: unet_2d_256
   - _self_
 
 
@@ -32,6 +32,7 @@ num_workers: 16
 samples_dir: "./samples"
 checkpoint_dir: "./checkpoints"
 checkpoint_path: None
+latent: False
 
 
 # Optimizer configuration
